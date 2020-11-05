@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading;
 
 namespace Tetris
@@ -10,9 +10,11 @@ namespace Tetris
         const int mapSizeX = 10;
         const int mapSizeY = 20;
 
-        const int holdSizeX = 6;
+     
 
         static int score = 0;
+
+        const int holdSizeX = 6;
         const int holdSizeY = mapSizeY;
 
         const int upNextSize = 6;
@@ -35,7 +37,10 @@ namespace Tetris
         static int bagIndex;
         static int currentIndex;
         static int maxTime = 20;
+        static char[,] bg = new char[mapSizeY,mapSizeX];
 
+
+        static int amount = 0;
         #region Assets
 
         readonly static string characters = "OILJSZT";
@@ -93,9 +98,7 @@ namespace Tetris
 
             int timer = 0;
 
-
             
-            char[,] bg = new char[mapSizeY,mapSizeX];
             Thread inputThread = new Thread(Input);
             inputThread.Start();
             bag = GenerateBag();
@@ -111,14 +114,11 @@ namespace Tetris
                 // DOWN
                 if (timer >= maxTime)
                 {
-                    if(!Collision(currentIndex, bg, currentX, currentY+1, currentRot))
-                    {
-                        currentY++;
-                    }
+                    if(!Collision(currentIndex, bg, currentX, currentY+1, currentRot)) currentY++;
                     else
                     {
                         //maxTime--;
-                        score += 100;
+                        //score += 100;
                         //add block to bg
                         for (int i = 0; i < positions.GetLength(2); i++)
                         {
@@ -280,26 +280,21 @@ namespace Tetris
                 //RENDER UP NEXT
                 char[,] next = new char[mapSizeY,upNextSize];
                 for (int y = 0; y < mapSizeY; y++)
-                {
                     for (int x = 0; x < upNextSize; x++)
-                    {
                         next[y,x] = ' ';
-                    }
-                }
+                
+                
                 int nextBagIndex = 0;
                 for (int i = 0; i < 3; i++)
                 {
                     
                     for (int l = 0; l < positions.GetLength(2); l++)
                     {
-                        if (i+bagIndex >= 7)
-                        {
-                           next[positions[nextBag[nextBagIndex],0, l,1] + 5*i, positions[nextBag[nextBagIndex],0,l,0] + 1] = characters[nextBag[nextBagIndex]];
-                        }
-                        else
-                        {
+                        if (i+bagIndex >= 7)   
+                            next[positions[nextBag[nextBagIndex],0, l,1] + 5*i, positions[nextBag[nextBagIndex],0,l,0] + 1] = characters[nextBag[nextBagIndex]];          
+                        else 
                             next[positions[bag[bagIndex+i],0,l,1] + 5*i, positions[bag[bagIndex+i],0,l,0]+1] = characters[bag[bagIndex+i]];
-                        }
+                        
                         
                     }
                     if (i+bagIndex >= 7) nextBagIndex++; 
@@ -314,19 +309,12 @@ namespace Tetris
                     for (int x = 0; x < holdSizeX + mapSizeX+upNextSize; x++)
                     {
                         char i = ' ';
-                        if (x < holdSizeX) 
-                        {
-                            i = hold[y,x];
-                        }   
-                        else if (x >= holdSizeX+mapSizeX)
-                        {
-                            i = next[y,x-mapSizeX-upNextSize];
-                        }
-                        else
-                        {
 
-                            i = view[y,(x-holdSizeX)];
-                        } 
+                        // Add hold + Main View + up next to view
+                        if (x < holdSizeX)  i = hold[y,x]; 
+                        else if (x >= holdSizeX+mapSizeX) i = next[y,x-mapSizeX-upNextSize];
+                        else i = view[y,(x-holdSizeX)];
+
 
                         
 
@@ -388,6 +376,7 @@ namespace Tetris
 
         static int[] GenerateBag()
         {
+            // Not my code, source https://stackoverflow.com/questions/108819/best-way-to-randomize-an-array-with-net
             Random random = new Random();
             int n = 7;
             int[] ret = {0,1,2,3,4,5,6,7};
@@ -451,10 +440,18 @@ namespace Tetris
                 nextBag = GenerateBag();
             }
             currentY = 0;
-            currentX = mapSizeX / 2;
+            currentX = 4;
             currentChar = characters[bag[bagIndex]];
             currentIndex = bag[bagIndex];   
+            if(Collision(currentIndex, bg, currentX, currentY, currentRot) && amount > 0)
+            {
+                Console.Clear();
+                Console.WriteLine("GAME OVER!!");
+                Console.ReadKey();
+                Environment.Exit(1);
+            }
             bagIndex++;
+            amount++;
         }
     
         static void Input()
@@ -462,7 +459,6 @@ namespace Tetris
             while (true)
             {
                 input = Console.ReadKey(true);
-                Thread.Sleep(20);
             }
         }
     }
