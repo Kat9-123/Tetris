@@ -95,9 +95,9 @@ namespace Tetris
 #endregion   
         static void Main(string[] args)
         {
-
+            Console.CursorVisible = false;
             int timer = 0;
-
+               
             
             Thread inputThread = new Thread(Input);
             inputThread.Start();
