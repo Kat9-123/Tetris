@@ -128,23 +128,23 @@ namespace Tetris
                         // check for lines or something
                         while (true)
                         {
-                            int y = Line(bg);
-                            if(y != -1)
+                            int lineY = Line(bg);
+                            if(lineY != -1)
                             {
                                 for (int x = 0; x < mapSizeX; x++)
                                 {
-                                    bg[y,x] = '-';
+                                    bg[lineY,x] = '-';
                                 }
                             
-                                for (int i = y-1; i > 0; i--)
+                                for (int y = lineY-1; y > 0; y--)
                                 {
                                     for (int x = 0; x < mapSizeX; x++)
                                     {
-                                        char character = bg[i,x];
+                                        char character = bg[y,x];
                                         if (character != '-')
                                         {
-                                            bg[i,x] = '-';
-                                            bg[i+1,x] = character;  
+                                            bg[y,x] = '-';
+                                            bg[y+1,x] = character;  
                                         }
 
                                     }
