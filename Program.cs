@@ -1,3 +1,5 @@
+﻿/* Made by Kat9_123 */
+
 using System;
 using System.Threading;
 
@@ -14,21 +16,24 @@ namespace Tetris
 
         static int score = 0;
 
+        // Hold variables
         const int holdSizeX = 6;
         const int holdSizeY = mapSizeY;
+        static int holdIndex = -1;
+        static char holdChar;
 
         const int upNextSize = 6;
 
         static ConsoleKeyInfo input;
+
+
         static int currentX = 0;
         static int currentY = 0;
         static char currentChar = 'O';
 
         static int currentRot = 0;
 
-        static int holdIndex = -1;
 
-        static char holdChar;
 
 
         static int[] bag;
@@ -43,8 +48,23 @@ namespace Tetris
         static int amount = 0;
         #region Assets
 
+
+        /* Possible modification
+        readonly static ConsoleColor[] colours = 
+        {
+            ConsoleColor.Red,
+            ConsoleColor.Blue,
+            ConsoleColor.Green,
+            ConsoleColor.Magenta,
+            ConsoleColor.Yellow,
+            ConsoleColor.White,
+            ConsoleColor.Cyan
+
+        };
+        */
         readonly static string characters = "OILJSZT";
-        readonly static int[,,,] positions = {
+        readonly static int[,,,] positions = 
+        {
         {
         {{0,0},{1,0},{0,1},{1,1}},
         {{0,0},{1,0},{0,1},{1,1}},
@@ -95,9 +115,9 @@ namespace Tetris
 #endregion   
         static void Main(string[] args)
         {
-            Console.CursorVisible = false;
+
             int timer = 0;
-               
+
             
             Thread inputThread = new Thread(Input);
             inputThread.Start();
@@ -128,23 +148,23 @@ namespace Tetris
                         // check for lines or something
                         while (true)
                         {
-                            int lineY = Line(bg);
-                            if(lineY != -1)
+                            int y = Line(bg);
+                            if(y != -1)
                             {
                                 for (int x = 0; x < mapSizeX; x++)
                                 {
-                                    bg[lineY,x] = '-';
+                                    bg[y,x] = '-';
                                 }
                             
-                                for (int y = lineY-1; y > 0; y--)
+                                for (int i = y-1; i > 0; i--)
                                 {
                                     for (int x = 0; x < mapSizeX; x++)
                                     {
-                                        char character = bg[y,x];
+                                        char character = bg[i,x];
                                         if (character != '-')
                                         {
-                                            bg[y,x] = '-';
-                                            bg[y+1,x] = character;  
+                                            bg[i,x] = '-';
+                                            bg[i+1,x] = character;  
                                         }
 
                                     }
@@ -317,7 +337,6 @@ namespace Tetris
 
 
                         
-
                         switch (i)
                         {
                             case 'O':
@@ -463,12 +482,3 @@ namespace Tetris
         }
     }
 }
-
-
-
-
-
-
-
-
-
