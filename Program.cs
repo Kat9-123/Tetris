@@ -1,24 +1,21 @@
-﻿/* Made by Kat9_123 */
-
+﻿// Made by Kat9_123
+//And AnonimKisi
 using System;
+using System.Diagnostics;
 using System.Threading;
 
 namespace Tetris
 {
-    
-
     class Program
     {
+
         const int mapSizeX = 10;
         const int mapSizeY = 20;
-
-     
-
-        static int score = 0;
 
         // Hold variables
         const int holdSizeX = 6;
         const int holdSizeY = mapSizeY;
+
         static int holdIndex = -1;
         static char holdChar;
 
@@ -26,15 +23,12 @@ namespace Tetris
 
         static ConsoleKeyInfo input;
 
-
         static int currentX = 0;
         static int currentY = 0;
+
         static char currentChar = 'O';
 
         static int currentRot = 0;
-
-
-
 
         static int[] bag;
         static int[] nextBag;
@@ -42,10 +36,21 @@ namespace Tetris
         static int bagIndex;
         static int currentIndex;
         static int maxTime = 20;
-        static char[,] bg = new char[mapSizeY,mapSizeX];
 
+        static char[,] bg = new char[mapSizeY, mapSizeX];
 
         static int amount = 0;
+
+        static Thread InputThread = new Thread(Input);
+
+        static void Input()
+        {
+            while (true)
+            {
+                    input = Console.ReadKey(true);
+            }
+        }
+       
         #region Assets
 
 
@@ -63,7 +68,7 @@ namespace Tetris
         };
         */
         readonly static string characters = "OILJSZT";
-        readonly static int[,,,] positions = 
+        readonly static int[,,,] positions =
         {
         {
         {{0,0},{1,0},{0,1},{1,1}},
@@ -112,29 +117,25 @@ namespace Tetris
         {{1,0},{1,1},{0,1},{1,2}}
         }
         };
-#endregion   
-        static void Main(string[] args)
+        #endregion
+        static void Main()
         {
-
+            InputThread.Start();            
             int timer = 0;
-
-            
-            Thread inputThread = new Thread(Input);
-            inputThread.Start();
             bag = GenerateBag();
             nextBag = GenerateBag();
             NewBlock();
-            for (int y = 0; y < mapSizeY; y++) 
+            for (int y = 0; y < mapSizeY; y++)
                 for (int x = 0; x < mapSizeX; x++)
-                    bg[y,x] = '-';
-            
+                    bg[y, x] = '-';
+
             while (true)
             {
 
                 // DOWN
                 if (timer >= maxTime)
                 {
-                    if(!Collision(currentIndex, bg, currentX, currentY+1, currentRot)) currentY++;
+                    if (!Collision(currentIndex, bg, currentX, currentY + 1, currentRot)) currentY++;
                     else
                     {
                         //maxTime--;
@@ -142,82 +143,75 @@ namespace Tetris
                         //add block to bg
                         for (int i = 0; i < positions.GetLength(2); i++)
                         {
-                            bg[positions[currentIndex, currentRot,i,1] + currentY, positions[currentIndex, currentRot,i,0] + currentX] = currentChar;
+                            bg[positions[currentIndex, currentRot, i, 1] + currentY, positions[currentIndex, currentRot, i, 0] + currentX] = currentChar;
                         }
 
                         // check for lines or something
                         while (true)
                         {
                             int y = Line(bg);
-                            if(y != -1)
+                            if (y != -1)
                             {
                                 for (int x = 0; x < mapSizeX; x++)
                                 {
-                                    bg[y,x] = '-';
+                                    bg[y, x] = '-';
                                 }
-                            
-                                for (int i = y-1; i > 0; i--)
+
+                                for (int i = y - 1; i > 0; i--)
                                 {
                                     for (int x = 0; x < mapSizeX; x++)
                                     {
-                                        char character = bg[i,x];
+                                        char character = bg[i, x];
                                         if (character != '-')
                                         {
-                                            bg[i,x] = '-';
-                                            bg[i+1,x] = character;  
+                                            bg[i, x] = '-';
+                                            bg[i + 1, x] = character;
                                         }
 
                                     }
                                 }
-                                
+
                                 continue;
                             }
                             break;
                         }
                         // new block
                         NewBlock();
-
-
-                        
-
                     }
                     timer = 0;
                 }
                 timer++;
-                
-
-                
 
                 // INPUT
                 bool space = false;
                 switch (input.Key)
                 {
                     case ConsoleKey.LeftArrow:
-                        if(!Collision(currentIndex, bg, currentX - 1, currentY, currentRot)) currentX -= 1;
+                        if (!Collision(currentIndex, bg, currentX - 1, currentY, currentRot)) currentX -= 1;
                         break;
                     case ConsoleKey.RightArrow:
-                        if(!Collision(currentIndex, bg, currentX + 1, currentY, currentRot)) currentX += 1;
+                        if (!Collision(currentIndex, bg, currentX + 1, currentY, currentRot)) currentX += 1;
                         break;
 
                     case ConsoleKey.UpArrow:
                         int newRot = currentRot + 1;
-                        if(newRot >= 4) newRot = 0;
-                        if(!Collision(currentIndex, bg, currentX, currentY, newRot)) currentRot = newRot;
-                        
+                        if (newRot >= 4) newRot = 0;
+                        if (!Collision(currentIndex, bg, currentX, currentY, newRot)) currentRot = newRot;
+
                         break;
-                        
+
                     case ConsoleKey.Spacebar:
                         int i = 0;
                         space = true;
                         while (true)
                         {
                             i++;
-                            if(Collision(currentIndex, bg, currentX, currentY+i, currentRot))
+                            if (Collision(currentIndex, bg, currentX, currentY + i, currentRot))
                             {
-                                currentY += i-1;
+                                currentY += i - 1;
                                 break;
                             }
-                            
+
                         }
                         break;
 
@@ -225,9 +219,9 @@ namespace Tetris
                         Environment.Exit(1);
                         break;
 
-                    
+
                     case ConsoleKey.Enter:
-                                        
+
                         if (holdIndex == -1)
                         {
                             holdIndex = currentIndex;
@@ -236,10 +230,10 @@ namespace Tetris
                         }
                         else
                         {
-                            if(!Collision(holdIndex,bg,currentX,currentY,0))
+                            if (!Collision(holdIndex, bg, currentX, currentY, 0))
                             {
                                 int c = currentIndex;
-                                char ch = currentChar;  
+                                char ch = currentChar;
                                 currentIndex = holdIndex;
                                 currentChar = holdChar;
                                 holdIndex = c;
@@ -248,95 +242,95 @@ namespace Tetris
 
                         }
                         break;
-                    
+
                     case ConsoleKey.DownArrow:
                         timer = maxTime;
                         break;
-                    
+
                     default:
                         break;
                 }
                 input = new ConsoleKeyInfo();
-                
-                if(space)
+
+                if (space)
                 {
                     continue;
                 }
 
 
                 // RENDER CURRENT
-                char[,] view = new char[mapSizeY,mapSizeX];
+                char[,] view = new char[mapSizeY, mapSizeX];
                 for (int y = 0; y < mapSizeY; y++)
                 {
                     for (int x = 0; x < mapSizeX; x++)
                     {
-                        view[y,x] = bg[y,x];
+                        view[y, x] = bg[y, x];
                     }
                 }
 
                 for (int i = 0; i < positions.GetLength(2); i++)
                 {
-                    view[positions[currentIndex,currentRot, i,1] + currentY, positions[currentIndex, currentRot,i,0] + currentX] = currentChar;
+                    view[positions[currentIndex, currentRot, i, 1] + currentY, positions[currentIndex, currentRot, i, 0] + currentX] = currentChar;
                 }
 
                 // RENDER HOLD
-                char[,] hold = new char[holdSizeY,holdSizeX];
+                char[,] hold = new char[holdSizeY, holdSizeX];
                 for (int y = 0; y < holdSizeY; y++)
                 {
                     for (int x = 0; x < holdSizeX; x++)
                     {
-                        hold[y,x] = ' ';
+                        hold[y, x] = ' ';
                     }
                 }
                 if (holdIndex != -1)
                 {
                     for (int i = 0; i < positions.GetLength(2); i++)
                     {
-                        hold[positions[holdIndex, 0, i,1] + 1, positions[holdIndex,0,i,0] + 1] = holdChar;
+                        hold[positions[holdIndex, 0, i, 1] + 1, positions[holdIndex, 0, i, 0] + 1] = holdChar;
                     }
                 }
 
 
                 //RENDER UP NEXT
-                char[,] next = new char[mapSizeY,upNextSize];
+                char[,] next = new char[mapSizeY, upNextSize];
                 for (int y = 0; y < mapSizeY; y++)
                     for (int x = 0; x < upNextSize; x++)
-                        next[y,x] = ' ';
-                
-                
+                        next[y, x] = ' ';
+
+
                 int nextBagIndex = 0;
                 for (int i = 0; i < 3; i++)
                 {
-                    
+
                     for (int l = 0; l < positions.GetLength(2); l++)
                     {
-                        if (i+bagIndex >= 7)   
-                            next[positions[nextBag[nextBagIndex],0, l,1] + 5*i, positions[nextBag[nextBagIndex],0,l,0] + 1] = characters[nextBag[nextBagIndex]];          
-                        else 
-                            next[positions[bag[bagIndex+i],0,l,1] + 5*i, positions[bag[bagIndex+i],0,l,0]+1] = characters[bag[bagIndex+i]];
-                        
-                        
+                        if (i + bagIndex >= 7)
+                            next[positions[nextBag[nextBagIndex], 0, l, 1] + 5 * i, positions[nextBag[nextBagIndex], 0, l, 0] + 1] = characters[nextBag[nextBagIndex]];
+                        else
+                            next[positions[bag[bagIndex + i], 0, l, 1] + 5 * i, positions[bag[bagIndex + i], 0, l, 0] + 1] = characters[bag[bagIndex + i]];
+
+
                     }
-                    if (i+bagIndex >= 7) nextBagIndex++; 
-                }    
+                    if (i + bagIndex >= 7) nextBagIndex++;
+                }
 
 
                 // PRINT VIEW
                 for (int y = 0; y < mapSizeY; y++)
                 {
 
-                    
-                    for (int x = 0; x < holdSizeX + mapSizeX+upNextSize; x++)
+
+                    for (int x = 0; x < holdSizeX + mapSizeX + upNextSize; x++)
                     {
                         char i = ' ';
 
                         // Add hold + Main View + up next to view
-                        if (x < holdSizeX)  i = hold[y,x]; 
-                        else if (x >= holdSizeX+mapSizeX) i = next[y,x-mapSizeX-upNextSize];
-                        else i = view[y,(x-holdSizeX)];
+                        if (x < holdSizeX) i = hold[y, x];
+                        else if (x >= holdSizeX + mapSizeX) i = next[y, x - mapSizeX - upNextSize];
+                        else i = view[y, (x - holdSizeX)];
 
 
-                        
+
                         switch (i)
                         {
                             case 'O':
@@ -360,7 +354,7 @@ namespace Tetris
                             case 'Z':
                                 Console.ForegroundColor = ConsoleColor.DarkCyan;
                                 Console.Write(i);
-                                break;                                
+                                break;
                             case 'L':
                                 Console.ForegroundColor = ConsoleColor.Green;
                                 Console.Write(i);
@@ -370,12 +364,12 @@ namespace Tetris
                                 Console.ForegroundColor = ConsoleColor.DarkCyan;
                                 Console.Write(i);
                                 break;
-                           default:
+                            default:
                                 Console.ForegroundColor = ConsoleColor.DarkGray;
                                 Console.Write(i);
                                 break;
-                       }
-                        
+                        }
+
                     }
                     //if (y == 1)
                     //{
@@ -388,46 +382,46 @@ namespace Tetris
 
                 Thread.Sleep(20);
             }
-                
-            
+
+
         }
-        
+
 
         static int[] GenerateBag()
         {
             // Not my code, source https://stackoverflow.com/questions/108819/best-way-to-randomize-an-array-with-net
             Random random = new Random();
             int n = 7;
-            int[] ret = {0,1,2,3,4,5,6,7};
-            while (n > 1)
-            {
-                int k = random.Next(n--);
-                int temp = ret[n];
-                ret[n] = ret[k];
-                ret[k] = temp;
+            int[] ret = { 0, 1, 2, 3, 4, 5, 6, 7 };
+                while (n > 1)
+                {
                 
-            }
-            return ret;
+                    int k = random.Next(n--);
+                    int temp = ret[n];
+                    ret[n] = ret[k];
+                    ret[k] = temp;
 
+                }
+            return ret;
         }
         static bool Collision(int index, char[,] bg, int x, int y, int rot)
         {
-            
+
             for (int i = 0; i < positions.GetLength(2); i++)
             {
-                if(positions[index, rot,i,1]+y >= mapSizeY || positions[index, rot,i,0]+ x < 0 || positions[index, rot,i,0]+ x >= mapSizeX)
+                if (positions[index, rot, i, 1] + y >= mapSizeY || positions[index, rot, i, 0] + x < 0 || positions[index, rot, i, 0] + x >= mapSizeX)
                 {
                     return true;
                 }
-                if(bg[positions[index, rot,i,1]+y, positions[index, rot,i,0]+x] != '-')
-                {   
+                if (bg[positions[index, rot, i, 1] + y, positions[index, rot, i, 0] + x] != '-')
+                {
                     return true;
-                } 
+                }
             }
 
             return false;
         }
-        
+
         static int Line(char[,] bg)
         {
             for (int y = 0; y < mapSizeY; y++)
@@ -435,7 +429,7 @@ namespace Tetris
                 bool i = true;
                 for (int x = 0; x < mapSizeX; x++)
                 {
-                    if(bg[y,x] == '-')
+                    if (bg[y, x] == '-')
                     {
                         i = false;
                     }
@@ -452,7 +446,7 @@ namespace Tetris
 
         static void NewBlock()
         {
-            if (bagIndex >= 7)
+            while (bagIndex >= 7)
             {
                 bagIndex = 0;
                 bag = nextBag;
@@ -461,24 +455,25 @@ namespace Tetris
             currentY = 0;
             currentX = 4;
             currentChar = characters[bag[bagIndex]];
-            currentIndex = bag[bagIndex];   
-            if(Collision(currentIndex, bg, currentX, currentY, currentRot) && amount > 0)
-            {
+            currentIndex = bag[bagIndex];
+            if (Collision(currentIndex, bg, currentX, currentY, currentRot) && amount > 0)
+            {                                             
                 Console.Clear();
-                Console.WriteLine("GAME OVER!!");
-                Console.ReadKey();
-                Environment.Exit(1);
+                Console.WriteLine("\tGAME OVER");
+                Console.WriteLine("\n\tWant to try again?");
+                Console.Write("\tType 'Y' and hit Enter to try again: ");
+                if (String.Compare(Console.ReadLine(), "Y", true) == 0)
+                {
+                    var applicationPath = System.Reflection.Assembly.GetExecutingAssembly().Location;
+                    Process.Start(applicationPath);
+                    Environment.Exit(Environment.ExitCode);
+                }else
+                {
+                    Environment.Exit(0);
+                }                     
             }
             bagIndex++;
             amount++;
-        }
-    
-        static void Input()
-        {
-            while (true)
-            {
-                input = Console.ReadKey(true);
-            }
-        }
+        }       
     }
 }
