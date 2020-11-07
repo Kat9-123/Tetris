@@ -67,7 +67,6 @@ namespace Tetris
             ConsoleColor.Yellow,
             ConsoleColor.White,
             ConsoleColor.Cyan
-
         };
         */
         readonly static string characters = "OILJSZT";
@@ -121,7 +120,7 @@ namespace Tetris
         }
         };
         #endregion
-        static void Main(string[] args)
+        static void Main()
         {
             // Make the console cursor invisible
             Console.CursorVisible = false;
@@ -261,9 +260,7 @@ namespace Tetris
                     break;
 
                 case ConsoleKey.R:
-                    var applicationPath = System.Reflection.Assembly.GetExecutingAssembly().Location;
-                    Process.Start(applicationPath);
-                    Environment.Exit(Environment.ExitCode);
+                    Restart();
                     break;
 
                 default:
@@ -299,6 +296,13 @@ namespace Tetris
 
         }
 
+
+        static void Restart()
+        {
+            var applicationPath = System.Reflection.Assembly.GetExecutingAssembly().Location;
+            Process.Start(applicationPath);
+            Environment.Exit(Environment.ExitCode);
+        }
 
         static void ClearLine(int lineY)
         {
@@ -550,14 +554,12 @@ namespace Tetris
             if (String.Compare(Console.ReadLine(), "Y", true) == 0)
             {
                 // Restart game
-                var applicationPath = System.Reflection.Assembly.GetExecutingAssembly().Location;
-                Process.Start(applicationPath);
-                Environment.Exit(Environment.ExitCode);
+                Restart();
             }
             else
             {
                 // Or exit
-                Environment.Exit(0);
+                Environment.Exit(1);
             }
         }
         static void Input()
