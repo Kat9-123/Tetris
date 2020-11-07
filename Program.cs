@@ -7,20 +7,21 @@ using System.Diagnostics;
 
 namespace Tetris
 {
-
+    
 
     class Program
     {
         // Map / BG 
         const int mapSizeX = 10;
         const int mapSizeY = 20;
-        static char[,] bg = new char[mapSizeY, mapSizeX];
+        static char[,] bg = new char[mapSizeY,mapSizeX];
+     
 
-        //hold score
         static int score = 0;
 
         // Hold variables
         const int holdSizeX = 6;
+        const int holdSizeY = mapSizeY;
         static int holdIndex = -1;
         static char holdChar;
 
@@ -70,7 +71,7 @@ namespace Tetris
         };
         */
         readonly static string characters = "OILJSZT";
-        readonly static int[,,,] positions =
+        readonly static int[,,,] positions = 
         {
         {
         {{0,0},{1,0},{0,1},{1,1}},
@@ -119,8 +120,8 @@ namespace Tetris
         {{1,0},{1,1},{0,1},{1,2}}
         }
         };
-        #endregion
-        static void Main()
+#endregion   
+        static void Main(string[] args)
         {
             // Make the console cursor invisible
             Console.CursorVisible = false;
@@ -135,14 +136,10 @@ namespace Tetris
             NewBlock();
 
             // Generate an empty bg
-            for (int y = 0; y < mapSizeY; y++)
-            {
+            for (int y = 0; y < mapSizeY; y++) 
                 for (int x = 0; x < mapSizeX; x++)
-                {
-                    bg[y, x] = '-';
-                }
-            }
-
+                    bg[y,x] = '-';
+            
             while (true)
             {
 
@@ -150,17 +147,17 @@ namespace Tetris
                 if (timer >= maxTime)
                 {
                     // If it doesn't collide, just move it down. If it does call BlockDownCollision
-                    if (!Collision(currentIndex, bg, currentX, currentY + 1, currentRot)) currentY++;
+                    if(!Collision(currentIndex, bg, currentX, currentY+1, currentRot)) currentY++;
                     else
                     {
-                        BlockDownCollision();
+                       BlockDownCollision();
                     }
                     timer = 0;
                 }
                 timer++;
+                
 
-
-
+                
 
                 // INPUT
                 InputHandler(); // Call InputHandler
@@ -178,61 +175,61 @@ namespace Tetris
                 char[,] next = RenderUpNext(); // Render the next three blocks as an 'up next' feature
 
                 // PRINT VIEW
-                Print(view, hold, next); // Print everything to the screen
+                Print(view,hold,next); // Print everything to the screen
 
-                // I think this might be unneccessary. You decide it. Thread.Sleep(20); // Wait to not overload the processor
+                Thread.Sleep(20); // Wait to not overload the processor (I think it's better because it has no impact on game feel)
             }
-
-
+                
+            
         }
-
+        
 
         static void InputHandler()
         {
             switch (input.Key)
-            {
+            {   
                 // Left arrow = move left (if it doesn't collide)
                 case ConsoleKey.LeftArrow:
-                    if (!Collision(currentIndex, bg, currentX - 1, currentY, currentRot)) currentX -= 1;
+                    if(!Collision(currentIndex, bg, currentX - 1, currentY, currentRot)) currentX -= 1;
                     break;
 
                 // Right arrow = move right (if it doesn't collide)
                 case ConsoleKey.RightArrow:
-                    if (!Collision(currentIndex, bg, currentX + 1, currentY, currentRot)) currentX += 1;
+                    if(!Collision(currentIndex, bg, currentX + 1, currentY, currentRot)) currentX += 1;
                     break;
-
+                
                 // Rotate block (if it doesn't collide)
                 case ConsoleKey.UpArrow:
                     int newRot = currentRot + 1;
-                    if (newRot >= 4) newRot = 0;
-                    if (!Collision(currentIndex, bg, currentX, currentY, newRot)) currentRot = newRot;
-
+                    if(newRot >= 4) newRot = 0;
+                    if(!Collision(currentIndex, bg, currentX, currentY, newRot)) currentRot = newRot;
+                    
                     break;
-
-                // Move the block instantly down
+                
+                // Move the block instantly down (hard drop)
                 case ConsoleKey.Spacebar:
                     int i = 0;
                     while (true)
                     {
                         i++;
-                        if (Collision(currentIndex, bg, currentX, currentY + i, currentRot))
+                        if(Collision(currentIndex, bg, currentX, currentY+i, currentRot))
                         {
-                            currentY += i - 1;
+                            currentY += i-1;
                             break;
                         }
-
+                        
                     }
+                    score += i + 1;
                     break;
 
-               /* I think we dont need a ESC to exit function.
+                // Quit
                 case ConsoleKey.Escape:
                     Environment.Exit(1);
                     break;
-               */
 
                 // Hold block
                 case ConsoleKey.Enter:
-
+                                    
                     // If there isnt a current held block:
                     if (holdIndex == -1)
                     {
@@ -243,12 +240,12 @@ namespace Tetris
                     // If there is:
                     else
                     {
-                        if (!Collision(holdIndex, bg, currentX, currentY, 0)) // Check for collision
+                        if(!Collision(holdIndex,bg,currentX,currentY,0)) // Check for collision
                         {
 
                             // Switch current and hold
                             int c = currentIndex;
-                            char ch = currentChar;
+                            char ch = currentChar;  
                             currentIndex = holdIndex;
                             currentChar = holdChar;
                             holdIndex = c;
@@ -257,25 +254,23 @@ namespace Tetris
 
                     }
                     break;
-
+                
                 // Move down faster
                 case ConsoleKey.DownArrow:
                     timer = maxTime;
                     break;
-
+                
                 default:
                     break;
             }
         }
         static void BlockDownCollision()
         {
-            //maxTime--;
-            score += 100;
 
             // Add blocks from current to background
             for (int i = 0; i < positions.GetLength(2); i++)
             {
-                bg[positions[currentIndex, currentRot, i, 1] + currentY, positions[currentIndex, currentRot, i, 0] + currentX] = currentChar;
+                bg[positions[currentIndex, currentRot,i,1] + currentY, positions[currentIndex, currentRot,i,0] + currentX] = currentChar;
             }
 
             // Loop 
@@ -283,32 +278,12 @@ namespace Tetris
             {
                 // Check for line
                 int lineY = Line(bg);
-
+                
                 // If a line is detected
-                if (lineY != -1)
+                if(lineY != -1)
                 {
-                    // Clear said line
-                    for (int x = 0; x < mapSizeX; x++)
-                    {
-                        bg[lineY, x] = '-';
-                    }
-
-                    // Loop through all blocks above line
-                    for (int y = lineY - 1; y > 0; y--)
-                    {
-                        for (int x = 0; x < mapSizeX; x++)
-                        {
-                            // Move each character down
-                            char character = bg[y, x];
-                            if (character != '-')
-                            {
-                                bg[y, x] = '-';
-                                bg[y + 1, x] = character;
-                            }
-
-                        }
-                    }
-
+                    ClearLine(lineY);
+                    
                     continue;
                 }
                 break;
@@ -317,45 +292,66 @@ namespace Tetris
             NewBlock();
 
         }
-        static char[,] RenderView()
-        {
-            char[,] view = new char[mapSizeY, mapSizeX];
+        
 
-            // Make view equal to bg
-            for (int y = 0; y < mapSizeY; y++)
+        static void ClearLine(int lineY)
+        {
+            score += 40;
+            // Clear said line
+            for (int x = 0; x < mapSizeX; x++) bg[lineY,x] = '-';
+            
+            // Loop through all blocks above line
+            for (int y = lineY-1; y > 0; y--)
             {
                 for (int x = 0; x < mapSizeX; x++)
                 {
-                    view[y, x] = bg[y, x];
+                    // Move each character down
+                    char character = bg[y,x];
+                    if (character != '-')
+                    {
+                        bg[y,x] = '-';
+                        bg[y+1,x] = character;  
+                    }
+
                 }
-            }
+            }          
+        }
+        
+        static char[,] RenderView()
+        {
+            char[,] view = new char[mapSizeY,mapSizeX];
+
+            // Make view equal to bg
+            for (int y = 0; y < mapSizeY; y++)           
+                for (int x = 0; x < mapSizeX; x++)      
+                    view[y,x] = bg[y,x];
+                
+            
 
             // Overlay current
             for (int i = 0; i < positions.GetLength(2); i++)
             {
-                view[positions[currentIndex, currentRot, i, 1] + currentY, positions[currentIndex, currentRot, i, 0] + currentX] = currentChar;
+                view[positions[currentIndex,currentRot, i,1] + currentY, positions[currentIndex, currentRot,i,0] + currentX] = currentChar;
             }
             return view;
         }
 
         static char[,] RenderHold()
         {
-            char[,] hold = new char[mapSizeY, holdSizeX];
+            char[,] hold = new char[holdSizeY,holdSizeX];
             // Hold = ' ' array
-            for (int y = 0; y < mapSizeY; y++)
-            {
-                for (int x = 0; x < holdSizeX; x++)
-                {
-                    hold[y, x] = ' ';
-                }
-            }
+            for (int y = 0; y < holdSizeY; y++)            
+                for (int x = 0; x < holdSizeX; x++)                
+                    hold[y,x] = ' ';
+                
+            
             // If there is a held block
             if (holdIndex != -1)
             {
                 // Overlay blocks from hold
                 for (int i = 0; i < positions.GetLength(2); i++)
                 {
-                    hold[positions[holdIndex, 0, i, 1] + 1, positions[holdIndex, 0, i, 0] + 1] = holdChar;
+                    hold[positions[holdIndex, 0, i,1] + 1, positions[holdIndex,0,i,0] + 1] = holdChar;
                 }
             }
             return hold;
@@ -363,27 +359,27 @@ namespace Tetris
         static char[,] RenderUpNext()
         {
             // Up next = ' ' array   
-            char[,] next = new char[mapSizeY, upNextSize];
+            char[,] next = new char[mapSizeY,upNextSize];
             for (int y = 0; y < mapSizeY; y++)
                 for (int x = 0; x < upNextSize; x++)
-                    next[y, x] = ' ';
-
-
+                    next[y,x] = ' ';
+            
+            
             int nextBagIndex = 0;
             for (int i = 0; i < 3; i++) // Next 3 blocks
             {
-
+                
                 for (int l = 0; l < positions.GetLength(2); l++)
                 {
-                    if (i + bagIndex >= 7) // If we need to acces the next bag
-                        next[positions[nextBag[nextBagIndex], 0, l, 1] + 5 * i, positions[nextBag[nextBagIndex], 0, l, 0] + 1] = characters[nextBag[nextBagIndex]];
-                    else
-                        next[positions[bag[bagIndex + i], 0, l, 1] + 5 * i, positions[bag[bagIndex + i], 0, l, 0] + 1] = characters[bag[bagIndex + i]];
-
-
+                    if (i+bagIndex >= 7) // If we need to acces the next bag
+                        next[positions[nextBag[nextBagIndex],0, l,1] + 5*i, positions[nextBag[nextBagIndex],0,l,0] + 1] = characters[nextBag[nextBagIndex]];          
+                    else 
+                        next[positions[bag[bagIndex+i],0,l,1] + 5*i, positions[bag[bagIndex+i],0,l,0]+1] = characters[bag[bagIndex+i]];
+                    
+                    
                 }
-                if (i + bagIndex >= 7) nextBagIndex++;
-            }
+                if (i+bagIndex >= 7) nextBagIndex++; 
+            }    
             return next;
 
         }
@@ -392,14 +388,14 @@ namespace Tetris
         {
             for (int y = 0; y < mapSizeY; y++)
             {
-
-                for (int x = 0; x < holdSizeX + mapSizeX + upNextSize; x++)
+                
+                for (int x = 0; x < holdSizeX + mapSizeX+upNextSize; x++)
                 {
                     char i = ' ';
                     // Add hold + Main View + up next to view (basically dark magic)
-                    if (x < holdSizeX) i = hold[y, x];
-                    else if (x >= holdSizeX + mapSizeX) i = next[y, x - mapSizeX - upNextSize];
-                    else i = view[y, (x - holdSizeX)];
+                    if (x < holdSizeX)  i = hold[y,x]; 
+                    else if (x >= holdSizeX+mapSizeX) i = next[y,x-mapSizeX-upNextSize];
+                    else i = view[y,(x-holdSizeX)];
 
 
                     // Colours
@@ -426,7 +422,7 @@ namespace Tetris
                         case 'Z':
                             Console.ForegroundColor = ConsoleColor.DarkCyan;
                             Console.Write(i);
-                            break;
+                            break;                                
                         case 'L':
                             Console.ForegroundColor = ConsoleColor.Green;
                             Console.Write(i);
@@ -441,12 +437,12 @@ namespace Tetris
                             Console.Write(i);
                             break;
                     }
-
+                    
                 }
                 if (y == 1)
                 {
                     Console.ForegroundColor = ConsoleColor.DarkGray;
-                    Console.Write("\tScore: " + score);
+                    Console.Write("   " + score);
                 }
                 Console.WriteLine();
             }
@@ -459,46 +455,46 @@ namespace Tetris
             // Not my code, source https://stackoverflow.com/questions/108819/best-way-to-randomize-an-array-with-net
             Random random = new Random();
             int n = 7;
-            int[] ret = { 0, 1, 2, 3, 4, 5, 6, 7 };
+            int[] ret = {0,1,2,3,4,5,6,7};
             while (n > 1)
             {
                 int k = random.Next(n--);
                 int temp = ret[n];
                 ret[n] = ret[k];
                 ret[k] = temp;
-
+                
             }
             return ret;
 
         }
         static bool Collision(int index, char[,] bg, int x, int y, int rot)
         {
-
+            
             for (int i = 0; i < positions.GetLength(2); i++)
             {
                 // Check if out of bounds
-                if (positions[index, rot, i, 1] + y >= mapSizeY || positions[index, rot, i, 0] + x < 0 || positions[index, rot, i, 0] + x >= mapSizeX)
+                if(positions[index, rot,i,1]+y >= mapSizeY || positions[index, rot,i,0]+ x < 0 || positions[index, rot,i,0]+ x >= mapSizeX)
                 {
                     return true;
                 }
                 // Check if not '-'
-                if (bg[positions[index, rot, i, 1] + y, positions[index, rot, i, 0] + x] != '-')
-                {
+                if(bg[positions[index, rot,i,1]+y, positions[index, rot,i,0]+x] != '-')
+                {   
                     return true;
-                }
+                } 
             }
 
             return false;
         }
-
+        
         static int Line(char[,] bg)
         {
             for (int y = 0; y < mapSizeY; y++)
             {
                 bool i = true;
                 for (int x = 0; x < mapSizeX; x++)
-                {
-                    if (bg[y, x] == '-')
+                {   
+                    if(bg[y,x] == '-')
                     {
                         i = false;
                     }
@@ -514,7 +510,7 @@ namespace Tetris
         }
 
         static void NewBlock()
-        {
+        {   
             // Check if new bag is necessary
             if (bagIndex >= 7)
             {
@@ -527,17 +523,17 @@ namespace Tetris
             currentY = 0;
             currentX = 4;
             currentChar = characters[bag[bagIndex]];
-            currentIndex = bag[bagIndex];
+            currentIndex = bag[bagIndex];   
 
             // Check if the next block position collides. If it does its gameover
-            if (Collision(currentIndex, bg, currentX, currentY, currentRot) && amount > 0)
+            if(Collision(currentIndex, bg, currentX, currentY, currentRot) && amount > 0)
             {
                 GameOver();
             }
             bagIndex++;
             amount++;
         }
-
+    
 
         static void GameOver()
         {
@@ -556,7 +552,7 @@ namespace Tetris
             {
                 // Or exit
                 Environment.Exit(0);
-            }
+            }     
         }
         static void Input()
         {
