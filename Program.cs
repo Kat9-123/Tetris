@@ -125,6 +125,9 @@ namespace Tetris
             // Make the console cursor invisible
             Console.CursorVisible = false;
 
+            // Title
+            Console.Title = "Tetris | By: Kat9_123 & KeremEskicinar";
+
             // Start the inputthread to get live inputs
             Thread inputThread = new Thread(Input);
             inputThread.Start();
@@ -147,10 +150,8 @@ namespace Tetris
                 {
                     // If it doesn't collide, just move it down. If it does call BlockDownCollision
                     if (!Collision(currentIndex, bg, currentX, currentY + 1, currentRot)) currentY++;
-                    else
-                    {
-                        BlockDownCollision();
-                    }
+                    else BlockDownCollision();
+
                     timer = 0;
                 }
                 timer++;
@@ -188,16 +189,19 @@ namespace Tetris
             switch (input.Key)
             {
                 // Left arrow = move left (if it doesn't collide)
+                case ConsoleKey.A:
                 case ConsoleKey.LeftArrow:
                     if (!Collision(currentIndex, bg, currentX - 1, currentY, currentRot)) currentX -= 1;
                     break;
 
                 // Right arrow = move right (if it doesn't collide)
+                case ConsoleKey.D:
                 case ConsoleKey.RightArrow:
                     if (!Collision(currentIndex, bg, currentX + 1, currentY, currentRot)) currentX += 1;
                     break;
 
                 // Rotate block (if it doesn't collide)
+                case ConsoleKey.W:
                 case ConsoleKey.UpArrow:
                     int newRot = currentRot + 1;
                     if (newRot >= 4) newRot = 0;
@@ -255,6 +259,7 @@ namespace Tetris
                     break;
 
                 // Move down faster
+                case ConsoleKey.S:
                 case ConsoleKey.DownArrow:
                     timer = maxTime;
                     break;
@@ -297,7 +302,7 @@ namespace Tetris
         }
 
 
-        static void Restart()
+            static void Restart()
         {
             var applicationPath = System.Reflection.Assembly.GetExecutingAssembly().Location;
             Process.Start(applicationPath);
@@ -509,10 +514,7 @@ namespace Tetris
                         i = false;
                     }
                 }
-                if (i)
-                {
-                    return y;
-                }
+                if (i) return y;
             }
 
             // If no line return -1
