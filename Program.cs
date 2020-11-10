@@ -302,7 +302,7 @@ namespace Tetris
         }
 
 
-            static void Restart()
+        static void Restart()
         {
             var applicationPath = System.Reflection.Assembly.GetExecutingAssembly().Location;
             Process.Start(applicationPath);
