@@ -1,4 +1,4 @@
-// Made by: Kat9_123 & KeremEskicinar
+// Made by: Kat9_123
 
 
 using System;
@@ -549,20 +549,8 @@ namespace Tetris
 
         static void GameOver()
         {
-            Console.Clear();
-            Console.WriteLine("\tGAME OVER");
-            Console.WriteLine("\n\tWant to try again?");
-            Console.Write("\tType 'Y' and hit Enter to try again: ");
-            if (String.Compare(Console.ReadLine(), "Y", true) == 0)
-            {
-                // Restart game
-                Restart();
-            }
-            else
-            {
-                // Or exit
-                Environment.Exit(1);
-            }
+            // Possible restart functionality
+            Environment.Exit(1);
         }
         static void Input()
         {
