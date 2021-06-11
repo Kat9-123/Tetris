@@ -126,7 +126,7 @@ namespace Tetris
             Console.CursorVisible = false;
 
             // Title
-            Console.Title = "Tetris | By: Kat9_123 & KeremEskicinar";
+            Console.Title = "Tetris | By: Kat9_123";
 
             // Start the inputthread to get live inputs
             Thread inputThread = new Thread(Input);
@@ -304,6 +304,7 @@ namespace Tetris
 
         static void Restart()
         {
+            // Quite messy but it kinda works. Code by: KeremEskicinar
             var applicationPath = System.Reflection.Assembly.GetExecutingAssembly().Location;
             Process.Start(applicationPath);
             Environment.Exit(Environment.ExitCode);
